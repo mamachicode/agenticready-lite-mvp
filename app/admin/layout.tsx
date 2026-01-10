@@ -1,15 +1,15 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("admin_token")?.value;
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const token = cookies().get("admin_token")?.value;
 
-  if (!token) redirect("/admin/login");
+  // Allow login page to pass
+  const isLogin = typeof window !== "undefined" && window.location.pathname === "/admin/login";
+
+  if (!token && !isLogin) {
+    redirect("/admin/login");
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
