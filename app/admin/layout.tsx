@@ -9,9 +9,7 @@ export default async function AdminLayout({
   const cookieStore = await cookies();
   const token = cookieStore.get("admin_token")?.value;
 
-  if (!token) {
-    redirect("/admin/login");
-  }
+  if (!token) redirect("/admin/login");
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
