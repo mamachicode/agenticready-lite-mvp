@@ -4,16 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { sendReportEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
-  const deny = requireAdmin(req);
-  if (deny) return deny;
+  requireAdmin(req);
 
   const { orderId } = await req.json();
 
-  const order = await prisma.order.update({
+  await prisma.order.update({
     where: { id: orderId },
     data: { status: "FULFILLED" },
   });
 
-  await sendReportEmail(order.email, order.id);
+  await sendReportEmail(orderId);
+
   return NextResponse.json({ ok: true });
 }

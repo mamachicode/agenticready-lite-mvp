@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Order {
@@ -12,16 +13,14 @@ model Order {
   email            String
   amount           Int
   currency         String
-  status           String
-  createdAt        DateTime @default(now())
-
+  status           String   @default("PENDING")
   reportS3Key      String?
-  reportUploadedAt DateTime?
+  createdAt        DateTime @default(now())
 }
 
 model StripeEvent {
   id        String   @id
   type      String
-  processed Boolean  @default(false)
+  payload   String
   createdAt DateTime @default(now())
 }
