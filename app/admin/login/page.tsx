@@ -9,22 +9,37 @@ export default function AdminLogin() {
     e.preventDefault();
     setError("");
 
-    const res = await fetch("/pages/api/admin/login", {
+    const res = await fetch("/api/admin/login", {
       method: "POST",
-      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pass }),
     });
 
-    if (res.ok) window.location.replace("/admin");
-    else setError("Invalid password");
+    if (!res.ok) {
+      setError("Invalid password");
+      return;
+    }
+
+    const data = await res.json();
+    if (!data?.token) {
+      setError("Login failed (no token).");
+      return;
+    }
+
+    localStorage.setItem("admin_token", data.token);
+    window.location.replace("/admin");
   }
 
   return (
     <div style={{ padding: 40 }}>
       <h1>Admin Login</h1>
       <form onSubmit={handleLogin}>
-        <input type="password" value={pass} onChange={(e)=>setPass(e.target.value)} />
+        <input
+          type="password"
+          placeholder="Admin password"
+          value={pass}
+          onChange={(e) => setPass(e.target.value)}
+        />
         <button type="submit">Login</button>
       </form>
       {error && <p style={{ color: "red" }}>{error}</p>}
