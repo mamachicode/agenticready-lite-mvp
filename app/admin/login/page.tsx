@@ -1,11 +1,13 @@
 "use client";
+
 import { useState } from "react";
 
 export default function AdminLogin() {
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
 
-  async function login() {
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
     setError("");
 
     const res = await fetch("/api/admin/login", {
@@ -14,31 +16,26 @@ export default function AdminLogin() {
       body: JSON.stringify({ pass }),
     });
 
-    if (!res.ok) {
+    if (res.ok) {
+      window.location.href = "/admin";
+    } else {
       setError("Invalid password");
-      return;
     }
-
-    // Only redirect AFTER cookie/token has been set by API
-    location.href = "/admin/orders";
   }
 
   return (
-    <div className="max-w-sm mx-auto mt-40 bg-white p-6 rounded shadow">
-      <h1 className="text-xl mb-4">Admin Login</h1>
-
-      <input
-        type="password"
-        placeholder="Admin password"
-        className="border p-2 w-full mb-4"
-        onChange={(e) => setPass(e.target.value)}
-      />
-
-      {error && <p className="text-red-600 mb-3">{error}</p>}
-
-      <button onClick={login} className="bg-black text-white w-full py-2 rounded">
-        Login
-      </button>
+    <div style={{ padding: 40 }}>
+      <h1>Admin Login</h1>
+      <form onSubmit={handleLogin}>
+        <input
+          type="password"
+          placeholder="Admin password"
+          value={pass}
+          onChange={(e) => setPass(e.target.value)}
+        />
+        <button type="submit">Login</button>
+      </form>
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 }
