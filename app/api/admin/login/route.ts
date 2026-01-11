@@ -10,6 +10,6 @@ export async function POST(req: Request) {
   }
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.set("admin_token", "ok", { httpOnly: true, path: "/" });
+  res.cookies.set("admin_token", "ok", { httpOnly: true, sameSite: "lax", secure: true, path: "/" });
   return res;
 }
