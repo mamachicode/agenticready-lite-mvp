@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/requireAdmin";
-import { prisma } from "@/lib/prisma";
-import { sendReportReadyEmail } from "@/lib/email";
+import { requireAdmin } from "../../../lib/requireAdmin";
+import { prisma } from "../../../lib/prisma";
+import { sendReportEmail } from "../../../lib/email";
 
 export async function POST(req: NextRequest) {
   const deny = requireAdmin(req);
@@ -19,6 +19,6 @@ export async function POST(req: NextRequest) {
     data: { status: "FULFILLED" },
   });
 
-  await sendReportReadyEmail(order.email, order.id);
+  await sendReportEmail(order.email, order.id);
   return NextResponse.json({ ok: true });
 }

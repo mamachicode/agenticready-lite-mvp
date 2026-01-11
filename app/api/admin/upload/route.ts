@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/requireAdmin";
-import { uploadPdfAndPresign } from "@/lib/s3";
-import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "../../../lib/requireAdmin";
+import { uploadPdfAndPresign } from "../../../lib/s3";
+import { prisma } from "../../../lib/prisma";
 
 export async function POST(req: NextRequest) {
   const deny = requireAdmin(req);
