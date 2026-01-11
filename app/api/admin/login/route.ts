@@ -1,4 +1,6 @@
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -10,11 +12,7 @@ export async function POST(req: Request) {
 
   const res = NextResponse.json(
     { ok: true },
-    {
-      headers: {
-        "Cache-Control": "no-store",     // ⬅ THIS IS THE CRITICAL LINE
-      },
-    }
+    { headers: { "Cache-Control": "no-store" } }
   );
 
   res.cookies.set({
