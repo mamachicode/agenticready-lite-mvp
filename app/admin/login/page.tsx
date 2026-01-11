@@ -5,7 +5,7 @@ export default function AdminLogin() {
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
 
-  async function handleLogin(e: React.FormEvent) {
+  async function login(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
@@ -20,29 +20,21 @@ export default function AdminLogin() {
       return;
     }
 
-    const data = await res.json();
-    if (!data?.token) {
-      setError("Login failed (no token).");
-      return;
-    }
-
-    localStorage.setItem("admin_token", data.token);
-    window.location.replace("/admin");
+    // Cookie is set by server — redirect directly
+    window.location.href = "/admin/orders";
   }
 
   return (
-    <div style={{ padding: 40 }}>
+    <form onSubmit={login} style={{ padding: 40 }}>
       <h1>Admin Login</h1>
-      <form onSubmit={handleLogin}>
-        <input
-          type="password"
-          placeholder="Admin password"
-          value={pass}
-          onChange={(e) => setPass(e.target.value)}
-        />
-        <button type="submit">Login</button>
-      </form>
+      <input
+        type="password"
+        placeholder="Admin password"
+        value={pass}
+        onChange={(e) => setPass(e.target.value)}
+      />
+      <button type="submit">Login</button>
       {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
+    </form>
   );
 }
