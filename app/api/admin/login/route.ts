@@ -5,11 +5,11 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   const { pass } = await req.json();
 
-  return NextResponse.json({
-    ok: true,
-    hasAdminPass: Boolean(process.env.ADMIN_PASS),
-    commit: process.env.VERCEL_GIT_COMMIT_SHA || "no-commit",
-    env: process.env.VERCEL_ENV || "no-env",
-    adminKeys: Object.keys(process.env).filter(k => k.toUpperCase().includes("ADMIN")),
-  });
+  if (pass !== process.env.ADMIN_PASS) {
+    return NextResponse.json({ error: "invalid" }, { status: 401 });
+  }
+
+  const res = NextResponse.json({ ok: true });
+  res.cookies.set("admin_token", "ok", { httpOnly: true, path: "/" });
+  return res;
 }
