@@ -1,13 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { signAdminToken } from "../../../lib/adminToken";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") return res.status(405).end();
 
-  const { pass } = req.body || {};
-  if (pass !== process.env.ADMIN_PASS) return res.status(401).json({ ok: false });
+  const { pass } = req.body;
+  if (pass !== process.env.ADMIN_PASS) return res.status(401).end();
 
-  const token = signAdminToken(60 * 60 * 24); // 24h
-  return res.status(200).json({ ok: true, token });
+  // Vercel-safe admin session cookie
+  res.setHeader("Set-Cookie", [
+    `admin_token=ok; Path=/; HttpOnly; Secure; SameSite=None`
+  ]);
+
+  res.status(200).json({ ok: true });
 }
