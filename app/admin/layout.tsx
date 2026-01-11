@@ -1,7 +1,19 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = cookies();
+  const token = cookieStore.get("admin_token")?.value;
+
+  if (token !== "ok") {
+    redirect("/admin/login");
+  }
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
-      {children}
-    </div>
+    <html>
+      <body>
+        {children}
+      </body>
+    </html>
   );
 }
