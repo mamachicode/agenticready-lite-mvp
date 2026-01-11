@@ -6,8 +6,10 @@ export async function POST(req: Request) {
   const { pass } = await req.json();
 
   return NextResponse.json({
-    youSent: pass,
-    serverSees: process.env.ADMIN_PASS,
-    adminEnvKeys: Object.keys(process.env).filter(k => k.toUpperCase().includes("ADMIN")),
+    ok: true,
+    hasAdminPass: Boolean(process.env.ADMIN_PASS),
+    commit: process.env.VERCEL_GIT_COMMIT_SHA || "no-commit",
+    env: process.env.VERCEL_ENV || "no-env",
+    adminKeys: Object.keys(process.env).filter(k => k.toUpperCase().includes("ADMIN")),
   });
 }
