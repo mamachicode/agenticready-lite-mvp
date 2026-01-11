@@ -1,19 +1,25 @@
-import { prisma } from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/requireAdmin";
 import { uploadPdfAndPresign } from "@/lib/s3";
+import { prisma } from "@/lib/prisma";
 
-export async function POST(req: Request) {
-  const form = await req.formData();
-  const orderId = form.get("orderId") as string;
-  const file = form.get("file") as File;
+export async function POST(req: NextRequest) {
+  const deny = requireAdmin(req);
+  if (deny) return deny;
 
-  const buffer = Buffer.from(await file.arrayBuffer());
+  const { orderId, fileBase64 } = await req.json();
 
-  const { s3Key } = await uploadPdfAndPresign(buffer, file.name);
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order || order.status !== "PAID") {
+    return NextResponse.json({ error: "Invalid order" }, { status: 400 });
+  }
+
+  const url = await uploadPdfAndPresign(orderId, fileBase64);
 
   await prisma.order.update({
     where: { id: orderId },
-    data: { reportS3Key: s3Key },
+    data: { reportUrl: url, status: "FULFILLED" },
   });
 
-  return Response.redirect(`/admin/orders/${orderId}`, 302);
+  return NextResponse.json({ ok: true });
 }
