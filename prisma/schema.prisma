@@ -3,24 +3,16 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Order {
-  id               String   @id @default(cuid())
-  stripeSessionId  String   @unique
-  email            String
-  amount           Int
-  currency         String
-  status           String   @default("PENDING")
-  reportS3Key      String?
-  createdAt        DateTime @default(now())
-}
-
-model StripeEvent {
-  id        String   @id
-  type      String
-  payload   String
-  createdAt DateTime @default(now())
+  id              String   @id @default(cuid())
+  email           String
+  status          String
+  stripeSessionId String
+  amount          Int
+  currency        String
+  createdAt       DateTime @default(now())
 }
