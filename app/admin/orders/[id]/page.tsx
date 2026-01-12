@@ -1,26 +1,29 @@
 import { getOrderById } from "@/lib/adminOrders";
+import { requireAdmin } from "@/lib/requireAdmin";
+
+export const dynamic = "force-dynamic";
 
 export default async function OrderPage({ params }: { params: { id: string } }) {
   const order = await getOrderById(params.id);
 
-  if (!order) return <div>Order not found</div>;
+  if (!order) {
+    return <div className="p-10">Order not found</div>;
+  }
 
   return (
-    <div>
-      <h1>Order Fulfillment</h1>
-      <p>Email: {order.email}</p>
+    <div className="p-10 space-y-6">
+      <h1 className="text-2xl font-bold">Order {order.id}</h1>
       <p>Status: {order.status}</p>
-      <p>Amount: {order.amount} {order.currency}</p>
+      <p>Email: {order.email}</p>
 
-      {order.reportS3Key ? (
-        <p>Report uploaded</p>
-      ) : (
-        <form action="/api/admin/upload" method="POST" encType="multipart/form-data">
-          <input type="hidden" name="orderId" value={order.id} />
-          <input type="file" name="file" accept="application/pdf" required />
-          <button type="submit">Upload PDF</button>
-        </form>
-      )}
+      <form action={`/api/admin/orders/${order.id}/upload`} method="post" encType="multipart/form-data">
+        <input type="file" name="file" required />
+        <button className="bg-blue-600 text-white px-4 py-2 rounded">Upload PDF</button>
+      </form>
+
+      <form action={`/api/admin/orders/${order.id}/fulfill`} method="post">
+        <button className="bg-green-600 text-white px-4 py-2 rounded">Mark Fulfilled</button>
+      </form>
     </div>
   );
 }
