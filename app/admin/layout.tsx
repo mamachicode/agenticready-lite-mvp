@@ -10,10 +10,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const pathname =
     h.get("x-pathname") ||
     h.get("next-url") ||
-    "/admin";
+    "";
 
-  // Only gate non-login admin pages
-  if (!token && pathname.startsWith("/admin") && pathname !== "/admin/login") {
+  // Allow login page always
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
+  // Gate everything else
+  if (!token) {
     redirect("/admin/login");
   }
 
