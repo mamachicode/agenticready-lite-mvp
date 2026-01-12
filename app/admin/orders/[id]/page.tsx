@@ -14,7 +14,7 @@ export default async function OrderPage({ params }: { params: { id: string } }) 
     <div className="p-10 space-y-6">
       <h1 className="text-2xl font-bold">Order {order.id}</h1>
       <p>Status: {order.status}</p>
-      <p>Email: {order.email}</p>
+      <p>Email: {order.email ?? "—"}</p>
 
       <form action={`/api/admin/orders/${order.id}/upload`} method="post" encType="multipart/form-data">
         <input type="file" name="file" required />
