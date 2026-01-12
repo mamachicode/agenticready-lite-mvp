@@ -1,11 +1,14 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("admin_token")?.value;
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const token = cookies().get("admin_token")?.value;
+  const pathname = headers().get("x-pathname") || "";
 
-  if (token !== "ok") redirect("/admin/login");
+  // Allow login page without auth
+  if (!token && !pathname.startsWith("/admin/login")) {
+    redirect("/admin/login");
+  }
 
   return <>{children}</>;
 }
