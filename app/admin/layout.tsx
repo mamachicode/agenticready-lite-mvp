@@ -1,14 +1,19 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+export const runtime = "nodejs";
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const token = (await cookies()).get("admin_token")?.value;
 
-  // Next sets `next-url` for App Router requests on Vercel; fallback to "/admin"
-  const nextUrl = (await headers()).get("next-url") || "/admin";
+  const h = await headers();
+  const pathname =
+    h.get("x-pathname") ||
+    h.get("next-url") ||
+    "/admin";
 
-  // Allow login page without auth
-  if (!token && nextUrl.startsWith("/admin") && !nextUrl.startsWith("/admin/login")) {
+  // Only gate non-login admin pages
+  if (!token && pathname.startsWith("/admin") && pathname !== "/admin/login") {
     redirect("/admin/login");
   }
 
