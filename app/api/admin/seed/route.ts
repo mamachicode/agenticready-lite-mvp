@@ -3,7 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 
 export async function POST() {
-  const token = cookies().get("admin_token")?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("admin_token")?.value;
+
   if (token !== "ok") {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
