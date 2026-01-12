@@ -1,3 +1,5 @@
+export const revalidate = 0;
+export const dynamicParams = true;
 export const runtime = "nodejs";
 import { getOrderById } from "@/lib/adminOrders";
 import { requireAdmin } from "@/lib/requireAdmin";
