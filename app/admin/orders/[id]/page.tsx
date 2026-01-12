@@ -1,5 +1,7 @@
-export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const preferredRegion = "iad1";
+export const fetchCache = "force-no-store";
 export const revalidate = 0;
 
 import { fetchAdminOrder } from "./actions";
