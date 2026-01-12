@@ -14,5 +14,7 @@ model Order {
   stripeSessionId String
   amount          Int
   currency        String
+  reportS3Key     String?      // uploaded PDF S3 key
+  fulfilledAt     DateTime?
   createdAt       DateTime @default(now())
 }
