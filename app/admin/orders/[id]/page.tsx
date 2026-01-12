@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import { getOrderById } from "@/lib/adminOrders";
 import { requireAdmin } from "@/lib/requireAdmin";
 
