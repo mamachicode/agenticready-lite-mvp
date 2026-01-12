@@ -1,28 +1,33 @@
-import { prisma } from "@/lib/prisma";
-import { Order } from "@prisma/client";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export default async function Orders() {
-  let orders: Order[] = [];
+import Link from "next/link";
+import { fetchPaidOrders } from "./actions";
 
-  try {
-    orders = await prisma.order.findMany({
-      where: { status: "PAID" },
-      orderBy: { createdAt: "desc" }
-    });
-  } catch (e) {
-    console.error("Admin orders load failed:", e);
-  }
+export default async function OrdersPage() {
+  const orders = await fetchPaidOrders();
 
   return (
-    <div>
-      <h1 className="text-2xl mb-4">Paid Orders</h1>
+    <div className="p-10 space-y-6">
+      <h1 className="text-2xl font-semibold">Paid Orders</h1>
+
       {orders.length === 0 ? (
-        <p>No paid orders yet.</p>
+        <div>No paid orders found.</div>
       ) : (
         <ul className="space-y-2">
-          {orders.map(o => (
-            <li key={o.id} className="bg-white p-4 rounded shadow">
-              <a href={`/admin/orders/${o.id}`} className="underline">{o.email}</a>
+          {orders.map((o) => (
+            <li key={o.id} className="p-4 bg-white rounded shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-mono text-sm">{o.id}</div>
+                  <div className="text-sm">Email: {o.email}</div>
+                  <div className="text-sm">Status: {o.status}</div>
+                </div>
+                <Link className="underline" href={`/admin/orders/${o.id}`}>
+                  Open
+                </Link>
+              </div>
             </li>
           ))}
         </ul>
