@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/requireAdmin";
+import { cookies } from "next/headers";
 
-export async function POST(req: Request) {
-  const admin = requireAdmin(req as any);
-  if (admin) return admin;
+export async function POST() {
+  const token = cookies().get("admin_token")?.value;
+  if (token !== "ok") {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
 
   const order = await prisma.order.create({
     data: {
