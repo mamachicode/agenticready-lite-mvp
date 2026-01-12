@@ -11,10 +11,10 @@ model Order {
   id              String   @id @default(cuid())
   email           String
   status          String
-  stripeSessionId String
+  stripeSessionId String   @unique
   amount          Int
   currency        String
-  reportS3Key     String?      // uploaded PDF S3 key
+  reportS3Key     String?
   fulfilledAt     DateTime?
   createdAt       DateTime @default(now())
 }
