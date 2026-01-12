@@ -1,9 +1,7 @@
-import { prisma } from "@/lib/prisma";
+import { getOrderById } from "@/lib/adminOrders";
 
 export default async function OrderPage({ params }: { params: { id: string } }) {
-  const order = await prisma.order.findUnique({
-    where: { id: params.id }
-  });
+  const order = await getOrderById(params.id);
 
   if (!order) return <div>Order not found</div>;
 
