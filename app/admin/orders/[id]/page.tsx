@@ -1,13 +1,12 @@
-export const revalidate = 0;
-export const dynamicParams = true;
 export const runtime = "nodejs";
-import { getOrderById } from "@/lib/adminOrders";
-import { requireAdmin } from "@/lib/requireAdmin";
-
 export const dynamic = "force-dynamic";
 
+import { prisma } from "@/lib/prisma";
+
 export default async function OrderPage({ params }: { params: { id: string } }) {
-  const order = await getOrderById(params.id);
+  const order = await prisma.order.findUnique({
+    where: { id: params.id },
+  });
 
   if (!order) {
     return <div className="p-10">Order not found</div>;
@@ -17,7 +16,7 @@ export default async function OrderPage({ params }: { params: { id: string } }) 
     <div className="p-10 space-y-6">
       <h1 className="text-2xl font-bold">Order {order.id}</h1>
       <p>Status: {order.status}</p>
-      <p>Email: {order.email ?? "—"}</p>
+      <p>Email: {order.email}</p>
 
       <form action={`/api/admin/orders/${order.id}/upload`} method="post" encType="multipart/form-data">
         <input type="file" name="file" required />
