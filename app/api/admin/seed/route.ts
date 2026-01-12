@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/requireAdmin";
 
 export async function POST(req: Request) {
-  // must stay node runtime
   const admin = requireAdmin(req as any);
   if (admin) return admin;
 
@@ -11,8 +10,10 @@ export async function POST(req: Request) {
     data: {
       email: "test@example.com",
       status: "paid",
+      stripeSessionId: "seed",
       amount: 1000,
-      reportUrl: null,
+      currency: "usd",
+      reportS3Key: null,
     },
   });
 
