@@ -10,7 +10,6 @@ export async function uploadReport(orderId: string, formData: FormData) {
   const file = formData.get("file") as File;
   if (!file) return;
 
-  // Placeholder S3 key — your existing upload infra already handles the real upload
   const s3Key = `${orderId}.pdf`;
 
   await prisma.order.update({
