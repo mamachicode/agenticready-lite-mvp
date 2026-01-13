@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { sendReportEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
-  requireAdmin(req);
+  const auth = requireAdmin(req);
+  if (auth) return auth;
 
   const { orderId } = await req.json();
 

@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { uploadPdfAndPresign } from "@/lib/s3";
 
 export async function POST(req: NextRequest) {
-  requireAdmin(req);
+  const auth = requireAdmin(req);
+  if (auth) return auth;
 
   const { orderId, key } = await req.json();
 
