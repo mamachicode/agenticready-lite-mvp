@@ -3,11 +3,10 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
 
-import { prisma } from "@/lib/prisma";
-
 export default async function Page({ params }: { params: { id: string } }) {
-  const order = await prisma.order.findUnique({ where: { id: params.id } });
-  if (!order) return <div className="p-10">Order not found</div>;
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/orders/${params.id}/report`, { cache: "no-store" });
+  if (!res.ok) return <div className="p-10">Failed to load order</div>;
+  const order = await res.json();
 
   return (
     <div className="p-10 space-y-6">
