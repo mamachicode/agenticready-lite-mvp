@@ -5,7 +5,7 @@ export const fetchCache = "force-no-store";
 
 import { prisma } from "@/lib/prisma";
 
-export default async function Page({ params }) {
+export default async function Page({ params }: { params: { id: string } }) {
   const order = await prisma.order.findUnique({ where: { id: params.id } });
   if (!order) return <div className="p-10">Order not found</div>;
 
