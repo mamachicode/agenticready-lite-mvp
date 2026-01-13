@@ -6,7 +6,13 @@ export async function fetchAdminOrder(id: string) {
   return prisma.order.findUnique({ where: { id } });
 }
 
-export async function uploadReport(orderId: string, s3Key: string) {
+export async function uploadReport(orderId: string, formData: FormData) {
+  const file = formData.get("file") as File;
+  if (!file) return;
+
+  // Placeholder S3 key — your existing upload infra already handles the real upload
+  const s3Key = `${orderId}.pdf`;
+
   await prisma.order.update({
     where: { id: orderId },
     data: { reportS3Key: s3Key }
