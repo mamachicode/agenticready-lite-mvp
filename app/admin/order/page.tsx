@@ -8,11 +8,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import ClientForms from "../_components/ClientForms";
 
-export default async function Page({ searchParams }: { searchParams: { id?: string } }) {
+export default async function Page(props: { searchParams: Promise<{ id?: string }> }) {
   const token = (await cookies()).get("admin_token")?.value;
   if (token !== "ok") redirect("/admin/login");
 
-  const id = typeof searchParams?.id === "string" ? searchParams.id : null;
+  const { id } = await props.searchParams;
   if (!id) return <div className="p-10">Invalid order id</div>;
 
   const order = await prisma.order.findUnique({ where: { id } });
