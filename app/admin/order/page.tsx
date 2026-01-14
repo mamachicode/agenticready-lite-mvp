@@ -6,7 +6,7 @@ export const fetchCache = "force-no-store";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import ClientForms from "../orders/[id]/ClientForms";
+import ClientForms from "../_components/ClientForms";
 
 export default async function Page({ searchParams }: { searchParams: { id?: string } }) {
   const token = (await cookies()).get("admin_token")?.value;
