@@ -4,15 +4,17 @@ export const revalidate = 0;
 export const fetchCache = "force-no-store";
 
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import ClientForms from "./ClientForms";
 
-export default async function Page({ params }: { params: { id?: string } }) {
+export default async function Page() {
   const token = (await cookies()).get("admin_token")?.value;
   if (token !== "ok") redirect("/admin/login");
 
-  const id = typeof params?.id === "string" ? params.id : null;
+  const path = (await headers()).get("x-pathname") || "";
+  const id = path.split("/").pop() || null;
+
   if (!id) return <div className="p-10">Invalid order id</div>;
 
   const order = await prisma.order.findUnique({ where: { id } });
