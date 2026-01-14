@@ -24,7 +24,7 @@ export default async function OrdersPage() {
                   <div className="text-sm">Email: {o.email}</div>
                   <div className="text-sm">Status: {o.status}</div>
                 </div>
-                <Link className="underline" href={`/admin/orders/${o.id}`}>
+                <Link className="underline" href={`/admin/order?id=${o.id}`}>
                   Open
                 </Link>
               </div>
