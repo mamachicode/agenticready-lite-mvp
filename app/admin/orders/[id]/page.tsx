@@ -6,6 +6,7 @@ export const fetchCache = "force-no-store";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import ClientForms from "./ClientForms";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const token = (await cookies()).get("admin_token")?.value;
@@ -24,17 +25,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         <div><b>Status:</b> {order.status}</div>
       </div>
 
-      <form method="POST" encType="multipart/form-data"
-            action={`/api/admin/orders/${order.id}/upload`}>
-        <input type="file" name="file" required />
-        <button className="ml-2 px-3 py-1 bg-black text-white rounded">Upload PDF</button>
-      </form>
-
-      <form method="POST" action={`/api/admin/orders/${order.id}/fulfill`}>
-        <button className="px-3 py-1 bg-green-700 text-white rounded">
-          Mark Fulfilled
-        </button>
-      </form>
+      <ClientForms id={order.id} />
     </div>
   );
 }
