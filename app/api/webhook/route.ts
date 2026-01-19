@@ -18,7 +18,11 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const customerEmail = session.customer_details?.email;
+
+    const customerEmail = session.customer_details?.email || "unknown";
+
+    const amount = session.amount_total || 0;
+    const currency = session.currency || "usd";
 
     await prisma.order.upsert({
       where: { stripeSessionId: session.id },
@@ -26,12 +30,11 @@ export async function POST(req: Request) {
       create: {
         stripeSessionId: session.id,
         status: "PAID",
-        email: customerEmail || "unknown"
+        email: customerEmail,
+        amount: amount,
+        currency: currency
       }
     });
-
-    // Future step: trigger SES email send here
-    // await sendAuditEmail(customerEmail);
   }
 
   return NextResponse.json({ received: true });
