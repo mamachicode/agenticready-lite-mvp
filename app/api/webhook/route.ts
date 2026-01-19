@@ -18,11 +18,20 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
+    const customerEmail = session.customer_details?.email;
 
-    await prisma.order.update({
+    await prisma.order.upsert({
       where: { stripeSessionId: session.id },
-      data: { status: "PAID" },
+      update: { status: "PAID" },
+      create: {
+        stripeSessionId: session.id,
+        status: "PAID",
+        email: customerEmail || "unknown"
+      }
     });
+
+    // Future step: trigger SES email send here
+    // await sendAuditEmail(customerEmail);
   }
 
   return NextResponse.json({ received: true });
