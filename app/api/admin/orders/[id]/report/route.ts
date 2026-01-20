@@ -6,7 +6,8 @@ export async function GET(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  requireAdmin(req);
+  const auth = requireAdmin(req);
+  if (auth) return auth;
 
   const { id } = await context.params;
 

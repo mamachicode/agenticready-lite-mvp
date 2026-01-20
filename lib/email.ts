@@ -62,3 +62,29 @@ export async function sendReportEmail(a: any, b?: any) {
   }
   return sendReportReadyEmail(a);
 }
+
+
+// -------- S3 Signed URL Helper --------
+
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION!,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
+
+export async function getSignedReportUrl(key: string) {
+  const bucket = process.env.AWS_S3_BUCKET!;
+
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: key,
+  });
+
+  // Link valid for 24 hours
+  return await getSignedUrl(s3, command, { expiresIn: 60 * 60 * 24 });
+}
