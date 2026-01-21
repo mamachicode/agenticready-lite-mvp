@@ -1,12 +1,10 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { verifyAdminToken } from "@/lib/adminToken";
+import { NextRequest, NextResponse } from "next/server";
 
 export function requireAdmin(req: NextRequest) {
-  const auth = req.headers.get("authorization") || "";
-  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  const token = req.cookies.get("admin_token")?.value;
 
-  if (!token || !verifyAdminToken(token)) {
+  // admin_token is set by /api/admin/login
+  if (!token) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
