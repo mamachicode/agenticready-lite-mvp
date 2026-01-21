@@ -1,13 +1,16 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import OrdersClient from "./OrdersClient";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
-export default function AdminOrdersPage() {
-  return (
-    <main style={{ padding: 24, fontFamily: "system-ui" }}>
-      <h1>Admin — Orders</h1>
-      <OrdersClient />
-    </main>
-  );
+export default async function AdminOrdersPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("admin_token");
+
+  if (!token) {
+    redirect("/admin/login");
+  }
+
+  return <OrdersClient />;
 }
