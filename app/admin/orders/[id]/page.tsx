@@ -1,4 +1,4 @@
-import OrderClient from "../../order/OrderClient";
+import OrderClient from "@/app/admin/order/OrderClient";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
