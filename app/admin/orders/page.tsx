@@ -1,23 +1,13 @@
-import { prisma } from "@/lib/prisma";
+import OrdersClient from "./OrdersClient";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
-export default async function AdminOrdersPage() {
-  const orders = await prisma.order.findMany({
-    where: {
-      status: "PAID",
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 50,
-  });
-
+export default function AdminOrdersPage() {
   return (
-    <div>
-      <h1>Paid Orders</h1>
-      <pre>{JSON.stringify(orders, null, 2)}</pre>
-    </div>
+    <main style={{ padding: 24, fontFamily: "system-ui" }}>
+      <h1>Admin — Orders</h1>
+      <OrdersClient />
+    </main>
   );
 }
