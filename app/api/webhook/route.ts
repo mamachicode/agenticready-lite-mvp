@@ -1,20 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { PrismaClient } from "@prisma/client";
 
-export async function POST(request: NextRequest) {
-  console.log("WEBHOOK_HIT_V1");
+const prisma = new PrismaClient();
 
-  console.log("method:", request.method);
-  console.log("url:", request.url);
-  console.log("host:", request.headers.get("host"));
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2024-12-18.acacia",
+});
 
-  let body: any = null;
+export async function POST(req: NextRequest) {
+  const body = await req.text();
+  const signature = req.headers.get("stripe-signature");
 
-  try {
-    body = await request.json();
-    console.log("stripe event id:", body?.id);
-  } catch (err) {
-    console.log("error reading body:", err);
+  if (!signature) {
+    console.error("Missing Stripe signature");
+    return NextResponse.json({ error: "Missing signature" }, { status: 400 });
   }
 
-  return NextResponse.json({ ok: true });
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    );
+  } catch (err: any) {
+    console.error("Webhook signature verification failed:", err.message);
+    return NextResponse.json({ error: err.message }, { status: 400 });
+  }
+
+  console.log("WEBHOOK_HIT_V1");
+  console.log("Stripe event:", event.id, event.type);
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+
+    if (!session.id) {
+      console.error("Missing session.id");
+      return NextResponse.json({ error: "Invalid session" }, { status: 400 });
+    }
+
+    await prisma.order.upsert({
+      where: { stripeSessionId: session.id },
+      update: {
+        status: "PAID",
+      },
+      create: {
+        stripeSessionId: session.id,
+        email: session.customer_details?.email ?? "",
+        status: "PAID",
+        amount: session.amount_total ?? 0,
+        currency: session.currency ?? "usd",
+      },
+    });
+
+    console.log("Order upserted for session:", session.id);
+  }
+
+  return NextResponse.json({ received: true });
 }
