@@ -3,10 +3,7 @@ import Stripe from "stripe";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -36,16 +33,9 @@ export async function POST(req: NextRequest) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    if (!session.id) {
-      console.error("Missing session.id");
-      return NextResponse.json({ error: "Invalid session" }, { status: 400 });
-    }
-
     await prisma.order.upsert({
       where: { stripeSessionId: session.id },
-      update: {
-        status: "PAID",
-      },
+      update: { status: "PAID" },
       create: {
         stripeSessionId: session.id,
         email: session.customer_details?.email ?? "",
@@ -55,7 +45,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log("Order upserted for session:", session.id);
+    console.log("Order upserted:", session.id);
   }
 
   return NextResponse.json({ received: true });
