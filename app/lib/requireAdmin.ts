@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
-export function requireAdmin(req: NextRequest) {
-  const token = req.cookies.get("admin_token")?.value;
+export function requireAdmin() {
+  const token = cookies().get("admin_token");
 
-  // admin_token is set by /api/admin/login
   if (!token) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }

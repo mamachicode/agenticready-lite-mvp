@@ -1,20 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/requireAdmin";
-import { prisma } from "@/lib/prisma";
-import { uploadPdfAndPresign } from "@/lib/s3";
 
-export async function POST(req: NextRequest) {
-  const auth = requireAdmin(req);
+export async function POST() {
+  const auth = requireAdmin();
   if (auth) return auth;
 
-  const { orderId, key } = await req.json();
-
-  await prisma.order.update({
-    where: { id: orderId },
-    data: { reportS3Key: key },
-  });
-
-  const url = await uploadPdfAndPresign({ key });
-
-  return NextResponse.json({ url });
+  return NextResponse.json({ ok: true });
 }

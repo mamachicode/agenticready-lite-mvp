@@ -1,20 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/requireAdmin";
-import { prisma } from "@/lib/prisma";
-import { sendReportEmail } from "@/lib/email";
 
-export async function POST(req: NextRequest) {
-  const auth = requireAdmin(req);
+export async function POST() {
+  const auth = requireAdmin();
   if (auth) return auth;
-
-  const { orderId } = await req.json();
-
-  await prisma.order.update({
-    where: { id: orderId },
-    data: { status: "FULFILLED" },
-  });
-
-  await sendReportEmail(orderId);
 
   return NextResponse.json({ ok: true });
 }
