@@ -1,16 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(
-  _req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = requireAdmin();
+  const auth = requireAdmin(req);
   if (auth) return auth;
 
+  const { id } = await params;
+
   const order = await prisma.order.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   return NextResponse.json(order);

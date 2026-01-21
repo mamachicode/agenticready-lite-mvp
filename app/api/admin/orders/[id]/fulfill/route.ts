@@ -1,16 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(
-  _req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = requireAdmin();
+  const auth = requireAdmin(req);
   if (auth) return auth;
 
+  const { id } = await params;
+
   await prisma.order.update({
-    where: { id: params.id },
+    where: { id },
     data: { status: "SENT", fulfilledAt: new Date() },
   });
 
