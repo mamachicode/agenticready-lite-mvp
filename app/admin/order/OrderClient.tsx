@@ -19,11 +19,23 @@ export default function OrderClient({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
 
   async function load() {
-    const res = await fetch("/api/admin/orders", { cache: "no-store" });
-    const data = await res.json();
-    const list = Array.isArray(data) ? data : data.orders ?? [];
-    const found = list.find((o: any) => o.id === id);
-    setOrder(found ?? null);
+    try {
+      const res = await fetch(`/api/admin/orders/${id}/report`, {
+        credentials: "include",
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        throw new Error(`Fetch failed (${res.status})`);
+      }
+
+      const data = await res.json();
+      setOrder(data);
+    } catch (e: any) {
+      setErr(e?.message || "Failed to load order");
+      setOrder(null);
+    }
+  }
   }
 
   useEffect(() => {
@@ -54,7 +66,7 @@ export default function OrderClient({ id }: { id: string }) {
       }
 
       setMsg("Order fulfilled and email sent.");
-      await load();
+      await load(); setMsg("Order fulfilled and email sent.");
     } catch (e: any) {
       setErr(e.message);
     } finally {
@@ -62,7 +74,7 @@ export default function OrderClient({ id }: { id: string }) {
     }
   }
 
-  if (!order) return <div>Loading…</div>;
+  if (!order) return <div className="p-4">Order not found.</div>;
 
   return (
     <div>
