@@ -17,6 +17,10 @@ export async function sendReportReadyEmail(params: {
   const subject = "Your Agentic Readiness Report Is Ready";
 
   const name = params.firstName || "there";
+  const absoluteUrl = params.downloadUrl.startsWith("http")
+    ? params.downloadUrl
+    : `${process.env.APP_URL}${params.downloadUrl}`;
+
 
   const body = `
 Hi ${name},
@@ -25,7 +29,7 @@ Your Agentic Readiness Lite Report is ready.
 
 You can securely access your report using the link below:
 
-${params.downloadUrl}
+${absoluteUrl}
 
 This report provides an independent, agent-focused evaluation of how your site is currently interpreted by autonomous systems, along with prioritized observations.
 
@@ -47,9 +51,26 @@ This link is private and intended only for the original recipient.
     },
     Message: {
       Subject: { Data: subject },
-      Body: { Text: { Data: body } },
+      Body: { Text: { Data: body }, Html: { Data: `
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;">
+  <h2>AgenticReady Report</h2>
+  <p>Hi ${name},</p>
+  <p>Your Agentic Readiness Lite report is ready.</p>
+  <p>
+    <a href="${absoluteUrl}" style="display:inline-block;padding:12px 18px;background:#111;color:#fff;text-decoration:none;border-radius:6px;">
+      Download Report
+    </a>
+  </p>
+  <p>If the button does not work, copy and paste this link:</p>
+  <p>${absoluteUrl}</p>
+  <hr/>
+  <p style="font-size:12px;color:#666;">
+    This link is private and intended only for the original recipient.
+  </p>
+</div>
+    ` } },
     },
-    Source: process.env.EMAIL_FROM!,
+    Source: `AgenticReady <${process.env.EMAIL_FROM!}>`,
   });
 
   await ses.send(cmd);
