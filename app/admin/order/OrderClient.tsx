@@ -50,7 +50,7 @@ export default function OrderClient({ id }: { id: string }) {
       });
 
       if (!res.ok) {
-        throw new Error(await res.text());
+        let message = "Fulfillment failed."; try { const data = await res.json(); if (data?.error) message = data.error; } catch {} throw new Error(message);
       }
 
       setMsg("Order fulfilled and email sent.");
@@ -83,7 +83,7 @@ export default function OrderClient({ id }: { id: string }) {
       <br /><br />
 
       <button onClick={fulfill} disabled={busy || order.status === "SENT"}>
-        Upload PDF + Send
+        {busy ? "Sending…" : "Upload PDF + Send"}
       </button>
 
       <p style={{ color: "green" }}>{msg}</p>
