@@ -37,14 +37,14 @@ export async function POST(
     return NextResponse.json({ ok: true });
 
   } catch (error: any) {
-    console.error("EMAIL_ROUTE_ERROR", error);
+    console.error("EMAIL_ROUTE_ERROR_FULL", JSON.stringify(error, null, 2));
 
     return NextResponse.json(
       {
-        error: error?.message || "Email send failed",
+        error: error?.message,
         name: error?.name,
-        code: error?.code,
-        stack: error?.stack,
+        code: error?.Code || error?.code,
+        metadata: error?.$metadata,
       },
       { status: 500 }
     );

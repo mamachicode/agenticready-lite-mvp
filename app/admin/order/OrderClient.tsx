@@ -66,7 +66,7 @@ export default function OrderClient({ id }: { id: string }) {
       });
 
       if (!sendRes.ok) {
-        throw new Error("Email send failed");
+        const errData = await sendRes.json(); throw new Error(errData?.error || "Email send failed");
       }
 
       setMsg("Order fulfilled and email sent.");
@@ -89,7 +89,7 @@ export default function OrderClient({ id }: { id: string }) {
       <div>
         <p><strong>Email:</strong> {order.email}</p>
         <p><strong>Status:</strong> {order.status}</p>
-        <p><strong>Amount:</strong> {order.amount} {order.currency}</p>
+        <p><strong>Amount:</strong> {(order.amount / 100).toLocaleString("en-US", { style: "currency", currency: order.currency?.toUpperCase() })}</p>
       </div>
 
       {msg && <div className="text-green-600">{msg}</div>}
