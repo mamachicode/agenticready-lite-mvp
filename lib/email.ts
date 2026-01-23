@@ -84,8 +84,8 @@ Download Report
 <p>If the button does not work, copy and paste this link into your browser:</p>
 
 <p style="word-break:break-all;">
-<a href="${absoluteUrl}" style="color:#2563eb;text-decoration:underline;">
-${absoluteUrl}
+<a href="https://agenticready.ai/report/${params.orderId}" style="color:#2563eb;text-decoration:underline;">
+https://agenticready.ai/report/${params.orderId}
 </a>
 </p>
 
