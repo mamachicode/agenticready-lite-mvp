@@ -35,7 +35,18 @@ export async function POST(
     });
 
     return NextResponse.json({ ok: true });
-  } catch (error) {
-    return NextResponse.json({ error }, { status: 500 });
+
+  } catch (error: any) {
+    console.error("EMAIL_ROUTE_ERROR", error);
+
+    return NextResponse.json(
+      {
+        error: error?.message || "Email send failed",
+        name: error?.name,
+        code: error?.code,
+        stack: error?.stack,
+      },
+      { status: 500 }
+    );
   }
 }
