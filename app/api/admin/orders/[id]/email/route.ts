@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendReportEmail } from "@/lib/email";
+import { sendReportEmail, getSignedReportUrl } from "@/lib/email";
 
 export async function POST(
   request: NextRequest,
@@ -24,7 +24,20 @@ export async function POST(
       );
     }
 
-    await sendReportEmail(order);
+    if (!order.reportS3Key) {
+      return NextResponse.json(
+        { error: "Report file not uploaded yet" },
+        { status: 400 }
+      );
+    }
+
+    const downloadUrl = await getSignedReportUrl(order.reportS3Key);
+
+    await sendReportEmail({
+      to: order.email,
+      orderId: order.id,
+      downloadUrl,
+    });
 
     await prisma.order.update({
       where: { id },
