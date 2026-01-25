@@ -22,6 +22,7 @@ export async function sendReportReadyEmail(params: {
   to: string;
   orderId: string;
   downloadUrl: string;
+  websiteUrl?: string | null;
   firstName?: string;
 }) {
   const subject = "Your Agentic Readiness Report Is Ready";
@@ -35,6 +36,9 @@ export async function sendReportReadyEmail(params: {
 Hi ${name},
 
 Your Agentic Readiness Lite Report is ready.
+
+Website Audited:
+${params.websiteUrl || "Not provided"}
 
 Download here:
 ${absoluteUrl}
@@ -72,6 +76,9 @@ Your Agentic Readiness Lite report is ready. Download securely using the button 
 <p>Hi ${name},</p>
 
 <p>Your <strong>Agentic Readiness Lite</strong> report is ready.</p>
+
+<p><strong>Website Audited:</strong><br/>
+${params.websiteUrl || "Not provided"}</p>
 
 <p>You can securely access your report using the button below:</p>
 
