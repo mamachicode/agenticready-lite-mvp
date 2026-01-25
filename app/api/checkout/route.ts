@@ -17,7 +17,6 @@ export async function POST(req: Request) {
 
   const { email, amount, currency, websiteUrl } = await req.json();
 
-  // 🔒 Required field validation
   if (!websiteUrl || typeof websiteUrl !== "string") {
     return NextResponse.json(
       { error: "Website URL is required" },
@@ -26,6 +25,11 @@ export async function POST(req: Request) {
   }
 
   const normalizedUrl = normalizeUrl(websiteUrl);
+
+  const rawBase = process.env.APP_URL!;
+  const baseUrl = rawBase.startsWith("http")
+    ? rawBase
+    : `https://${rawBase}`;
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -44,8 +48,8 @@ export async function POST(req: Request) {
         quantity: 1,
       },
     ],
-    success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cancel`,
+    success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}/cancel`,
   });
 
   await prisma.order.create({
