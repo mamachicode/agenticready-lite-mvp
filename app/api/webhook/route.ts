@@ -1,18 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
-export async function POST(req: NextRequest) {
-  const body = await req.text();
-  const signature = req.headers.get("stripe-signature");
-
-  if (!signature) {
-    console.error("Missing Stripe signature");
-    return NextResponse.json({ error: "Missing signature" }, { status: 400 });
+function normalizeWebsite(url: string) {
+  let value = url.trim();
+  if (!value.startsWith("http://") && !value.startsWith("https://")) {
+    value = `https://${value}`;
   }
+  return value.replace(/\/$/, "");
+}
+
+export async function POST(req: Request) {
+  const body = await req.text();
+  const signature = req.headers.get("stripe-signature") as string;
 
   let event: Stripe.Event;
 
@@ -20,32 +22,38 @@ export async function POST(req: NextRequest) {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET as string
     );
-  } catch (err: any) {
-    console.error("Webhook signature verification failed:", err.message);
-    return NextResponse.json({ error: err.message }, { status: 400 });
+  } catch (err) {
+    console.error("WEBHOOK_SIGNATURE_ERROR", err);
+    return new NextResponse("Invalid signature", { status: 400 });
   }
-
-  console.log("WEBHOOK_HIT_V1");
-  console.log("Stripe event:", event.id, event.type);
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    await prisma.order.upsert({
-      where: { stripeSessionId: session.id },
-      update: { status: "PAID" },
-      create: {
+    const customFields = session.custom_fields || [];
+
+    const websiteField = customFields.find(
+      (f) => f.key === "website"
+    );
+
+    const rawWebsite = websiteField?.text?.value || null;
+
+    const normalizedWebsite = rawWebsite
+      ? normalizeWebsite(rawWebsite)
+      : null;
+
+    await prisma.order.create({
+      data: {
         stripeSessionId: session.id,
-        email: session.customer_details?.email ?? "",
+        email: session.customer_details?.email || "",
+        websiteUrl: normalizedWebsite,
+        amount: session.amount_total || 0,
+        currency: session.currency || "usd",
         status: "PAID",
-        amount: session.amount_total ?? 0,
-        currency: session.currency ?? "usd",
       },
     });
-
-    console.log("Order upserted:", session.id);
   }
 
   return NextResponse.json({ received: true });
