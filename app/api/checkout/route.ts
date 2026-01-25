@@ -17,6 +17,14 @@ export async function POST(req: Request) {
 
   const { email, amount, currency, websiteUrl } = await req.json();
 
+  // 🔒 Required field validation
+  if (!websiteUrl || typeof websiteUrl !== "string") {
+    return NextResponse.json(
+      { error: "Website URL is required" },
+      { status: 400 }
+    );
+  }
+
   const normalizedUrl = normalizeUrl(websiteUrl);
 
   const session = await stripe.checkout.sessions.create({
