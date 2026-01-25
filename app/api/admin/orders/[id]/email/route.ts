@@ -37,6 +37,7 @@ export async function POST(
       to: order.email,
       orderId: order.id,
       downloadUrl,
+      websiteUrl: order.websiteUrl,
     });
 
     await prisma.order.update({
