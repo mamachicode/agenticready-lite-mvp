@@ -38,7 +38,7 @@ export default function OrderClient({ id }: { id: string }) {
 
   async function handleSend() {
     if (!file) {
-      setErr('Please select a PDF file.');
+      setErr("Please select a PDF file.");
       return;
     }
 
@@ -66,7 +66,8 @@ export default function OrderClient({ id }: { id: string }) {
       });
 
       if (!sendRes.ok) {
-        const errData = await sendRes.json(); throw new Error(errData?.error || "Email send failed");
+        const errData = await sendRes.json();
+        throw new Error(errData?.error || "Email send failed");
       }
 
       setMsg("Order fulfilled and email sent.");
@@ -84,10 +85,13 @@ export default function OrderClient({ id }: { id: string }) {
 
   return (
     <div className="p-6 space-y-4">
-      <a href="/admin/orders" className="underline">← Back to orders</a>
+      <a href="/admin/orders" className="underline">
+        ← Back to orders
+      </a>
 
       <div>
         <p><strong>Email:</strong> {order.email}</p>
+        <p><strong>Website:</strong> {order.websiteUrl || "Not provided"}</p>
         <p><strong>Status:</strong> {order.status}</p>
         <p><strong>Amount:</strong> {(order.amount / 100).toLocaleString("en-US", { style: "currency", currency: order.currency?.toUpperCase() })}</p>
       </div>
