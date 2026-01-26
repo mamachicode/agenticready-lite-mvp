@@ -32,37 +32,10 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    // 🔎 Extract website from multiple possible Stripe locations
-    let rawWebsite: string | null = null;
+    console.log("FULL_SESSION_DEBUG", JSON.stringify(session, null, 2));
 
-    // 1️⃣ Standard custom_fields
-    if (session.custom_fields?.length) {
-      const field = session.custom_fields.find(f => f.key === "website");
-      rawWebsite = field?.text?.value || null;
-    }
-
-    // 2️⃣ Payment Link variation (sometimes nested in customer_details)
-    if (!rawWebsite && (session as any).customer_details?.custom_fields?.length) {
-      const field = (session as any).customer_details.custom_fields.find(
-        (f: any) => f.key === "website"
-      );
-      rawWebsite = field?.text?.value || null;
-    }
-
-    const normalizedWebsite = rawWebsite
-      ? normalizeWebsite(rawWebsite)
-      : null;
-
-    await prisma.order.create({
-      data: {
-        stripeSessionId: session.id,
-        email: session.customer_details?.email || "",
-        websiteUrl: normalizedWebsite,
-        amount: session.amount_total || 0,
-        currency: session.currency || "usd",
-        status: "PAID",
-      },
-    });
+    // Temporarily do NOT create order yet
+    return NextResponse.json({ received: true });
   }
 
   return NextResponse.json({ received: true });
