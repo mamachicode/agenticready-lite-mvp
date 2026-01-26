@@ -32,13 +32,22 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    const customFields = session.custom_fields || [];
+    // 🔎 Extract website from multiple possible Stripe locations
+    let rawWebsite: string | null = null;
 
-    const websiteField = customFields.find(
-      (f) => f.key === "website"
-    );
+    // 1️⃣ Standard custom_fields
+    if (session.custom_fields?.length) {
+      const field = session.custom_fields.find(f => f.key === "website");
+      rawWebsite = field?.text?.value || null;
+    }
 
-    const rawWebsite = websiteField?.text?.value || null;
+    // 2️⃣ Payment Link variation (sometimes nested in customer_details)
+    if (!rawWebsite && (session as any).customer_details?.custom_fields?.length) {
+      const field = (session as any).customer_details.custom_fields.find(
+        (f: any) => f.key === "website"
+      );
+      rawWebsite = field?.text?.value || null;
+    }
 
     const normalizedWebsite = rawWebsite
       ? normalizeWebsite(rawWebsite)
