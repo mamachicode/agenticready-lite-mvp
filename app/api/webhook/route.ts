@@ -1,28 +1,25 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
+import { normalizeWebsite } from "@/lib/normalizeWebsite";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+export const runtime = "nodejs";
 
-function normalizeWebsite(url: string) {
-  let value = url.trim();
-  if (!value.startsWith("http://") && !value.startsWith("https://")) {
-    value = `https://${value}`;
-  }
-  return value.replace(/\/$/, "");
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2024-06-20",
+});
 
 export async function POST(req: Request) {
+  const sig = req.headers.get("stripe-signature")!;
   const body = await req.text();
-  const signature = req.headers.get("stripe-signature") as string;
 
   let event: Stripe.Event;
 
   try {
     event = stripe.webhooks.constructEvent(
       body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET as string
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err) {
     console.error("WEBHOOK_SIGNATURE_ERROR", err);
@@ -32,10 +29,38 @@ export async function POST(req: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
-    console.log("FULL_SESSION_DEBUG", JSON.stringify(session, null, 2));
+    console.log("WEBHOOK_SESSION_FULL_START");
+    console.log(JSON.stringify(session, null, 2));
+    console.log("WEBHOOK_SESSION_FULL_END");
 
-    // Temporarily do NOT create order yet
-    return NextResponse.json({ received: true });
+    // Deterministic key-based extraction (Payment Link)
+    const rawUrl =
+      session.custom_fields
+        ?.find(f => f.key === "websitetoaudit")
+        ?.text?.value ?? "";
+
+    const websiteUrl =
+      rawUrl && typeof rawUrl === "string"
+        ? normalizeWebsite(rawUrl)
+        : null;
+
+    try {
+      await prisma.order.create({
+        data: {
+          stripeSessionId: session.id,
+          email: session.customer_details?.email || "",
+          amount: session.amount_total || 0,
+          currency: session.currency || "usd",
+          websiteUrl: websiteUrl,
+          status: "PAID",
+        },
+      });
+
+      return NextResponse.json({ received: true });
+    } catch (dbError) {
+      console.error("DATABASE_PERSISTENCE_ERROR", dbError);
+      return new NextResponse("Database Error", { status: 500 });
+    }
   }
 
   return NextResponse.json({ received: true });
